@@ -1,0 +1,4 @@
+INSTALL_DOCKER_COMPOSE: true
+IS_HTTP: false
+IS_BASE64: false
+#DOCKER_RESOURCE: "version: '3'\n\nservices:\n  app:\n    build: .\n    image: takacsmark/flask-redis:1.0\n    environment:\n      - FLASK_ENV=development\n    ports:\n      - 5000:5000\n\n  redis:\n    image: redis:4.0.11-alpine"

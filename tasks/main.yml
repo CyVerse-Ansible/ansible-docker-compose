@@ -1,0 +1,52 @@
+# install docker compose for cli assuming you have docker
+- name: Install, configure, and start Apache
+  block:
+    - name: PACKAGE; install docker compose
+      package:
+        name: docker-compose-plugin
+        state: present
+  when: INSTALL_DOCKER_COMPOSE|bool
+
+- name: Create /opt/cyverse_docker directory if it does not exist
+  ansible.builtin.file:
+    path: /opt/cyverse_docker
+    state: directory
+    mode: '0755'
+
+- name: COPY; create docker compose file from text
+  ansible.builtin.copy:
+    dest: /opt/cyverse_docker/docker-compose.yml
+    content: "{{ DOCKER_RESOURCE }}"
+  when: not IS_HTTP|bool and not IS_BASE64|bool
+
+- name: COPY; create docker compose file from base64 text
+  ansible.builtin.copy:
+    dest: /opt/cyverse_docker/docker-compose.yml
+    content: "{{ DOCKER_RESOURCE | b64decode }}"
+  when: not IS_HTTP|bool and IS_BASE64|bool
+
+- name: COPY; create docker compose file from http link
+  ansible.builtin.copy:
+    dest: /opt/cyverse_docker/docker-compose.yml
+    src: "{{ DOCKER_RESOURCE }}"
+    remote_src: true
+  when: IS_HTTP|bool and not IS_BASE64|bool
+
+- name: COPY; create docker compose file from base64 http link
+  ansible.builtin.copy:
+    dest: /opt/cyverse_docker/docker-compose.yml
+    src: "{{ DOCKER_RESOURCE | b64decode }}"
+    remote_src: true
+  when: IS_HTTP|bool and IS_BASE64|bool
+
+- name: SHELL; compose from created file
+  shell:
+    cmd: docker compose -f "/opt/cyverse_docker/docker-compose.yml" up -d
+  register: create_file
+  failed_when: create_file.rc != 0 and create_file.rc != 17
+
+
+# - name: FILE; delete compose file
+#   ansible.builtin.file:
+#     path: /opt/cyverse_docker/docker-compose.yml
+#     state: absent
