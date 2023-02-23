@@ -1,4 +1,4 @@
-CyVerse Ansible k3s
+CyVerse Ansible Docker Compose
 ===================
 
 This role will apply a docker compose file from a string or http link.
